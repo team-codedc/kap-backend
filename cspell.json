@@ -1,0 +1,13 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    /* nestjs */
+    "nestjs",
+
+    /* commitlint */
+    "commitlint"
+  ],
+  "flagWords": [],
+  "ignorePaths": ["node_modules/**", "./README.md", ".gitignore", "yarn.lock"]
+}
