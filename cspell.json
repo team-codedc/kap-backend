@@ -4,6 +4,7 @@
   "words": [
     /* nestjs */
     "nestjs",
+    "TYPEORM",
 
     /* commitlint */
     "commitlint"
