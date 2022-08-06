@@ -8,6 +8,7 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
     .setTitle('병주고 약주고')
     .setDescription('병주고 약주고 API 문서입니다')
