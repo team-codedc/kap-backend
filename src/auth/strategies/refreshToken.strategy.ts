@@ -16,11 +16,11 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
           return request?.cookies?.Refresh;
         },
       ]),
-      secretOrKey: configService.get('JWT_REFRESH_TOKEN_SECRET_KEY'),
+      secretOrKey: configService.get<string>('JWT_REFRESH_TOKEN_SECRET_KEY'),
     });
   }
 
   async validate(payload) {
-    return this.usersService.getUserProfile(payload.id);
+    return this.usersService.getUserById(payload.sub);
   }
 }

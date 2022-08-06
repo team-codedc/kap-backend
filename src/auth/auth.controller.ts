@@ -1,47 +1,38 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Post,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Response } from 'express';
 import { User } from 'src/entities';
 import { GetUser } from 'src/libs/decorators';
 import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
+import { SocialCodeDto } from './dto';
 import { RefreshTokenAuthGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
+    private readonly authService: AuthService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
   @Post('kakao')
-  async login(@Body() body, @Res({ passthrough: true }) res) {
+  async login(@Body() socialCodeDto: SocialCodeDto, @Res({ passthrough: true }) res: Response) {
     try {
-      const { code } = body;
-      if (!code) {
-        throw new BadRequestException('not null');
-      }
-      const kakaoUserInfo = await this.authService.kakaoLogin(code);
-      const kakaoUser = await this.userRepository.count({
-        where: kakaoUserInfo.id,
+      const { code } = socialCodeDto;
+      const kakaoUser = await this.authService.kakaoLogin(code);
+      const kakaoUsersCount = await this.userRepository.count({
+        where: kakaoUser.id,
       });
-      if (!kakaoUser)
+      if (kakaoUsersCount <= 0) {
         await this.authService.register(
-          kakaoUserInfo.id,
-          kakaoUserInfo.kakao_account.email,
-          kakaoUserInfo.kakao_account.profile.nickname,
+          kakaoUser.id,
+          kakaoUser.kakao_account.email,
+          kakaoUser.kakao_account.profile.nickname,
         );
+      }
       const user = await this.userRepository.findOne({
-        where: kakaoUserInfo.id,
+        where: kakaoUser.id,
       });
       const accessToken = await this.authService.generateAccessToken(user.id);
       const { refreshToken, ...refreshOption } = this.authService.generateRefreshTokenWithCookie(
