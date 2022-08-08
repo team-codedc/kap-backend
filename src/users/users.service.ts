@@ -22,6 +22,17 @@ export class UsersService {
     return user;
   }
 
+  public async getCountBySocialId(id: string) {
+    const user = await this.userRepository.count({ where: { socialId: id } });
+    return user;
+  }
+
+  public async getUserBySocialId(id: string) {
+    const user = await this.userRepository.findOne({ where: { socialId: id } });
+    if (!user) throw new NotFoundException('유저 정보를 찾을 수 없어요');
+    return user;
+  }
+
   public async updateUserProfile(userId: string, updateUserDto: UpdateUserDto) {
     try {
       const { name, nickname, birth } = updateUserDto;
