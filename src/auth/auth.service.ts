@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  Injectable,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -93,7 +88,8 @@ export class AuthService {
       res.cookie('Refresh', refreshToken, refreshOption);
       return { accessToken: accessToken };
     } catch (error) {
-      throw new UnauthorizedException('유효한 인증코드가 아니에요');
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('일시적인 오류가 발생했어요');
     }
   }
 
