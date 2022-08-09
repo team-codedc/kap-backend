@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  database:
+    container_name: kap-mariadb
+    image: mariadb:latest
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: KissNPunch
+      MARIADB_DATABASE: kap
+    ports:
+      - 5532:3306
+    volumes:
+      - ./mariadb:/var/lib/mysql
