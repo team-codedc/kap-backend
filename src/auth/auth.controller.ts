@@ -18,6 +18,14 @@ export class AuthController {
     return await this.authService.kakaoLogin(socialCodeDto, res);
   }
 
+  @Post('google')
+  async googleLogin(
+    @Body() socialCodeDto: SocialCodeDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return await this.authService.googleLogin(socialCodeDto, res);
+  }
+
   @UseGuards(RefreshTokenAuthGuard)
   @Get('refresh')
   async refresh(@GetUser() user: User) {
