@@ -5,6 +5,8 @@ import * as Joi from 'joi';
 import * as path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -21,17 +23,19 @@ import { AppService } from './app.service';
       useFactory: (configService: ConfigService) => {
         return {
           type: 'mariadb',
-          host: configService.get<string>('TYPEORM_HOST'),
-          port: parseInt(configService.get<string>('TYPEORM_PORT'), 10),
-          username: configService.get<string>('TYPEORM_USERNAME'),
-          password: configService.get<string>('TYPEORM_PASSWORD'),
-          database: configService.get<string>('TYPEORM_DATABASE'),
-          entities: [path.join(__dirname, configService.get<string>('TYPEORM_ENTITIES'))],
-          logging: configService.get<string>('TYPEORM_LOGGING') === 'true',
+          host: configService.get<string>('DB_HOST'),
+          port: parseInt(configService.get<string>('DB_PORT'), 10),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: configService.get<string>('DB_DATABASE'),
+          entities: [path.join(__dirname, configService.get<string>('DB_ENTITIES'))],
+          logging: configService.get<string>('DB_LOGGING') === 'true',
           synchronize: configService.get<string>('NODE_ENV') === 'development',
         };
       },
     }),
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
