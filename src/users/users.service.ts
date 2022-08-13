@@ -33,6 +33,13 @@ export class UsersService {
     return user;
   }
 
+  public async getUserBySocialEmail(email: string) {
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+    return user;
+  }
+
   public async updateUserProfile(userId: string, updateUserDto: UpdateUserDto) {
     try {
       const { name, nickname, birth } = updateUserDto;

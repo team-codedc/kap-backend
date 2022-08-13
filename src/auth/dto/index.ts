@@ -1,1 +1,1 @@
-export * from './social-code.dto';
+export * from './social-token.dto';

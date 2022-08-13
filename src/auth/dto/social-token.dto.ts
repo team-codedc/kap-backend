@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class SocialCodeDto {
+export class SocialTokenDto {
   @IsNotEmpty()
   @IsString()
-  code: string;
+  socialAccessToken: string;
 }

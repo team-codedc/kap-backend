@@ -1,19 +1,17 @@
-import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
-import * as qs from 'qs';
-import {
-  GOOGLE_TOKEN_URL,
-  GOOGLE_USER_INFO_URL,
-  KAKAO_TOKEN_URL,
-  KAKAO_USER_INFO_URL,
-  SOCIAL_TYPE,
-} from 'src/libs/constants';
-import { SocialCodeDto } from './dto';
+import { GOOGLE_USER_INFO_URL, KAKAO_USER_INFO_URL, SOCIAL_TYPE } from 'src/libs/constants';
+import { SocialTokenDto } from './dto';
 import { Response } from 'express';
 import { UsersService } from 'src/users/users.service';
 
@@ -27,13 +25,15 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async register(
-    socialId: string,
-    email: string | null,
-    name: string,
-    socialType: SOCIAL_TYPE,
-  ) {
+  public async register(socialId: string, email: string, name: string, socialType: SOCIAL_TYPE) {
     try {
+      const isAlreadyExistUser = await this.usersService.getUserBySocialEmail(email);
+
+      if (isAlreadyExistUser)
+        throw new ConflictException(
+          `이미 ${isAlreadyExistUser.socialType}에서 사용중인 이메일이에요`,
+        );
+
       const user = this.userRepository.create({
         socialId,
         email,
@@ -48,28 +48,12 @@ export class AuthService {
     }
   }
 
-  public async kakaoLogin(socialCodeDto: SocialCodeDto, res: Response) {
-    const { code } = socialCodeDto;
-    const body = {
-      grant_type: 'authorization_code',
-      client_id: this.configService.get<string>('KAKAO_CLIENT_ID'),
-      client_secret: this.configService.get<string>('KAKAO_CLIENT_SECRET'),
-      redirect_uri: this.configService.get<string>('KAKAO_REDIRECT_URI'),
-      code,
-    };
+  public async kakaoLogin(socialTokenDto: SocialTokenDto, res: Response) {
+    const { socialAccessToken } = socialTokenDto;
     try {
-      const responseToken = await axios({
-        method: 'POST',
-        url: KAKAO_TOKEN_URL,
-        timeout: 30000,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-        data: qs.stringify(body),
-      });
       const headerUserInfo = {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        Authorization: 'Bearer ' + responseToken.data.access_token,
+        Authorization: 'Bearer ' + socialAccessToken,
       };
       const responseUserInfo = await axios({
         method: 'GET',
@@ -98,28 +82,12 @@ export class AuthService {
     }
   }
 
-  public async googleLogin(socialCodeDto: SocialCodeDto, res: Response) {
-    const { code } = socialCodeDto;
-    const body = {
-      grant_type: 'authorization_code',
-      client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
-      client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-      redirect_uri: this.configService.get<string>('GOOGLE_REDIRECT_URI'),
-      code,
-    };
+  public async googleLogin(socialCodeDto: SocialTokenDto, res: Response) {
+    const { socialAccessToken } = socialCodeDto;
     try {
-      const responseToken = await axios({
-        method: 'POST',
-        url: GOOGLE_TOKEN_URL,
-        timeout: 30000,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        },
-        data: qs.stringify(body),
-      });
       const headerUserInfo = {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        Authorization: 'Bearer ' + responseToken.data.access_token,
+        Authorization: 'Bearer ' + socialAccessToken,
       };
       const responseUserInfo = await axios({
         method: 'GET',

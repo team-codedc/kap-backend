@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { User } from 'src/entities';
 import { GetUser } from 'src/libs/decorators';
 import { AuthService } from './auth.service';
-import { SocialCodeDto } from './dto';
+import { SocialTokenDto } from './dto';
 import { RefreshTokenAuthGuard } from './guards';
 
 @Controller('auth')
@@ -12,18 +12,18 @@ export class AuthController {
 
   @Post('kakao')
   async kakaoLogin(
-    @Body() socialCodeDto: SocialCodeDto,
+    @Body() socialTokenDto: SocialTokenDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return await this.authService.kakaoLogin(socialCodeDto, res);
+    return await this.authService.kakaoLogin(socialTokenDto, res);
   }
 
   @Post('google')
   async googleLogin(
-    @Body() socialCodeDto: SocialCodeDto,
+    @Body() socialTokenDto: SocialTokenDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return await this.authService.googleLogin(socialCodeDto, res);
+    return await this.authService.googleLogin(socialTokenDto, res);
   }
 
   @UseGuards(RefreshTokenAuthGuard)
