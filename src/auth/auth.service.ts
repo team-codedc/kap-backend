@@ -12,7 +12,6 @@ import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import { GOOGLE_USER_INFO_URL, KAKAO_USER_INFO_URL, SOCIAL_TYPE } from 'src/libs/constants';
 import { SocialTokenDto } from './dto';
-import { Response } from 'express';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -48,7 +47,7 @@ export class AuthService {
     }
   }
 
-  public async kakaoLogin(socialTokenDto: SocialTokenDto, res: Response) {
+  public async kakaoLogin(socialTokenDto: SocialTokenDto) {
     const { socialAccessToken } = socialTokenDto;
     try {
       const headerUserInfo = {
@@ -73,16 +72,15 @@ export class AuthService {
       }
       const user = await this.usersService.getUserBySocialId(kakaoUser.id);
       const accessToken = await this.generateAccessToken(user.id);
-      const { refreshToken, ...refreshOption } = this.generateRefreshTokenWithCookie(user.id);
-      res.cookie('Refresh', refreshToken, refreshOption);
-      return { accessToken: accessToken };
+      const { refreshToken } = this.generateRefreshTokenWithCookie(user.id);
+      return { accessToken, refreshToken };
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('일시적인 오류가 발생했어요');
     }
   }
 
-  public async googleLogin(socialCodeDto: SocialTokenDto, res: Response) {
+  public async googleLogin(socialCodeDto: SocialTokenDto) {
     const { socialAccessToken } = socialCodeDto;
     try {
       const headerUserInfo = {
@@ -102,9 +100,8 @@ export class AuthService {
       }
       const user = await this.usersService.getUserBySocialId(googleUser.id);
       const accessToken = await this.generateAccessToken(user.id);
-      const { refreshToken, ...refreshOption } = this.generateRefreshTokenWithCookie(user.id);
-      res.cookie('Refresh', refreshToken, refreshOption);
-      return { accessToken: accessToken };
+      const { refreshToken } = this.generateRefreshTokenWithCookie(user.id);
+      return { accessToken, refreshToken };
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('일시적인 오류가 발생했어요');
