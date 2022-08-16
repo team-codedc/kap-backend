@@ -9,10 +9,8 @@ import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import axios from 'axios';
-import { GOOGLE_USER_INFO_URL, KAKAO_USER_INFO_URL, SOCIAL_TYPE } from 'src/libs/constants';
-import { SocialTokenDto } from './dto';
 import { UsersService } from 'src/users/users.service';
+import { SOCIAL_TYPE } from 'src/libs/constants';
 
 @Injectable()
 export class AuthService {
@@ -39,40 +37,20 @@ export class AuthService {
         name,
         socialType,
       });
-      await this.userRepository.save(user);
-      return;
+
+      return await this.userRepository.save(user);
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('일시적인 오류가 발생했어요');
     }
   }
 
-  public async kakaoLogin(socialTokenDto: SocialTokenDto) {
-    const { socialAccessToken } = socialTokenDto;
+  public socialLogin(user: User) {
     try {
-      const headerUserInfo = {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        Authorization: 'Bearer ' + socialAccessToken,
-      };
-      const responseUserInfo = await axios({
-        method: 'GET',
-        url: KAKAO_USER_INFO_URL,
-        timeout: 30000,
-        headers: headerUserInfo,
-      });
-      const kakaoUser = responseUserInfo.data;
-      const kakaoUsersCount = await this.usersService.getCountBySocialId(kakaoUser.id);
-      if (kakaoUsersCount <= 0) {
-        await this.register(
-          kakaoUser.id,
-          kakaoUser.kakao_account.email,
-          kakaoUser.kakao_account.profile.nickname,
-          'KAKAO',
-        );
-      }
-      const user = await this.usersService.getUserBySocialId(kakaoUser.id);
-      const accessToken = await this.generateAccessToken(user.id);
-      const { refreshToken } = this.generateRefreshTokenWithCookie(user.id);
+      const { id } = user;
+      const accessToken = this.issueToken({ id }, true);
+      const refreshToken = this.issueToken({ id }, false);
+
       return { accessToken, refreshToken };
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -80,59 +58,17 @@ export class AuthService {
     }
   }
 
-  public async googleLogin(socialCodeDto: SocialTokenDto) {
-    const { socialAccessToken } = socialCodeDto;
-    try {
-      const headerUserInfo = {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        Authorization: 'Bearer ' + socialAccessToken,
-      };
-      const responseUserInfo = await axios({
-        method: 'GET',
-        url: GOOGLE_USER_INFO_URL,
-        timeout: 30000,
-        headers: headerUserInfo,
-      });
-      const googleUser = responseUserInfo.data;
-      const googleUsersCount = await this.usersService.getCountBySocialId(googleUser.id);
-      if (googleUsersCount <= 0) {
-        await this.register(googleUser.id, googleUser.email, googleUser.name, 'GOOGLE');
-      }
-      const user = await this.usersService.getUserBySocialId(googleUser.id);
-      const accessToken = await this.generateAccessToken(user.id);
-      const { refreshToken } = this.generateRefreshTokenWithCookie(user.id);
-      return { accessToken, refreshToken };
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      throw new InternalServerErrorException('일시적인 오류가 발생했어요');
-    }
-  }
-
-  public generateAccessToken(id: string) {
-    const accessToken = this.jwtService.sign(
-      { sub: id },
-      {
-        secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET_KEY'),
-        expiresIn: parseInt(this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRES_IN')),
-      },
+  public issueToken(payload: { id: string }, isAccessToken: boolean) {
+    const secret = this.configService.get<string>(
+      isAccessToken ? 'JWT_ACCESS_TOKEN_SECRET_KEY' : 'JWT_REFRESH_TOKEN_SECRET_KEY',
     );
-    return accessToken;
-  }
-
-  public generateRefreshTokenWithCookie(id: string) {
-    const token = this.jwtService.sign(
-      { sub: id },
-      {
-        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET_KEY'),
-        expiresIn: parseInt(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN')),
-      },
+    const expiresIn = parseInt(
+      this.configService.get<string>(
+        isAccessToken ? 'JWT_ACCESS_TOKEN_EXPIRES_IN' : 'JWT_REFRESH_TOKEN_EXPIRES_IN',
+      ),
     );
-    return {
-      refreshToken: token,
-      domain: 'localhost',
-      path: '/',
-      httpOnly: true,
-      maxAge: parseInt(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN')) * 1000,
-    };
+
+    const token = this.jwtService.sign({ sub: payload.id }, { secret, expiresIn });
+    return token;
   }
 }

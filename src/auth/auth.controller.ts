@@ -1,29 +1,31 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { User } from 'src/entities';
 import { GetUser } from 'src/libs/decorators';
 import { AuthService } from './auth.service';
-import { SocialTokenDto } from './dto';
-import { RefreshTokenAuthGuard } from './guards';
+import { GoogleAuthGuard, KakaoAuthGuard, RefreshTokenAuthGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(KakaoAuthGuard)
   @Post('kakao')
-  async kakaoLogin(@Body() socialTokenDto: SocialTokenDto) {
-    return await this.authService.kakaoLogin(socialTokenDto);
+  kakaoLogin(@Req() req: Request) {
+    return this.authService.socialLogin(req.user as User);
   }
 
+  @UseGuards(GoogleAuthGuard)
   @Post('google')
-  async googleLogin(@Body() socialTokenDto: SocialTokenDto) {
-    return await this.authService.googleLogin(socialTokenDto);
+  googleLogin(@Req() req: Request) {
+    return this.authService.socialLogin(req.user as User);
   }
 
   @UseGuards(RefreshTokenAuthGuard)
   @Get('refresh')
-  async refresh(@GetUser() user: User) {
-    const accessToken = await this.authService.generateAccessToken(user.id);
-    const { refreshToken } = await this.authService.generateRefreshTokenWithCookie(user.id);
+  refresh(@GetUser() user: User) {
+    const accessToken = this.authService.issueToken({ id: user.id }, true);
+    const refreshToken = this.authService.issueToken({ id: user.id }, false);
     return { accessToken, refreshToken };
   }
 }
