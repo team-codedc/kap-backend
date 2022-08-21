@@ -11,7 +11,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, Response<T>> {
   intercept(context: ExecutionContext, next: CallHandler<any>): Observable<Response<T>> {
     const httpContext = context.switchToHttp();
     const request: Request = httpContext.getRequest();
-    const allowPath: string[] = [];
+    const allowPath: string[] = ['/api/health'];
 
     if (allowPath.includes(request.url)) return next.handle().pipe();
 
