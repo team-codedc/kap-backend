@@ -7,7 +7,12 @@ import { User } from 'src/entities/user.entity';
 import { UsersModule } from 'src/users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AccessTokenStrategy, RefreshTokenStrategy } from './strategies';
+import {
+  AccessTokenStrategy,
+  GoogleStrategy,
+  KakaoStrategy,
+  RefreshTokenStrategy,
+} from './strategies';
 
 @Module({
   imports: [
@@ -29,6 +34,12 @@ import { AccessTokenStrategy, RefreshTokenStrategy } from './strategies';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  providers: [
+    AuthService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
+    GoogleStrategy,
+    KakaoStrategy,
+  ],
 })
 export class AuthModule {}

@@ -1,8 +1,9 @@
 import { SOCIAL_TYPE, SOCIAL_TYPE_VALUES } from 'src/libs/constants';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Unique } from 'typeorm';
 import { BaseEntity } from './base.entity';
 
 @Entity()
+@Unique(['socialId', 'email'])
 export class User extends BaseEntity {
   @Column({ type: 'varchar', name: 'social_id' })
   socialId: string;
