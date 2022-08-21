@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import axios, { AxiosError } from 'axios';
 import { Request } from 'express';
 import { Strategy } from 'passport-custom';
-
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from 'src/auth/auth.service';
 
@@ -59,7 +58,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       });
       const { id, kakao_account } = data;
 
-      const kakaoUserCount = await this.usersService.getCountBySocialId(id);
+      const kakaoUserCount = await this.usersService.getCountBySocialId(id, 'KAKAO');
       if (kakaoUserCount <= 0) {
         await this.authService.register(
           id,
@@ -69,7 +68,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         );
       }
 
-      const user = await this.usersService.getUserBySocialId(id);
+      const user = await this.usersService.getUserBySocialId(id, 'KAKAO');
       return user;
     } catch (error) {
       if (error instanceof AxiosError)

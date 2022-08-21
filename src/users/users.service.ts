@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
+import { SOCIAL_TYPE } from 'src/libs/constants';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto';
 
@@ -22,13 +23,13 @@ export class UsersService {
     return user;
   }
 
-  public async getCountBySocialId(id: string) {
-    const user = await this.userRepository.count({ where: { socialId: id } });
+  public async getCountBySocialId(id: string, type: SOCIAL_TYPE) {
+    const user = await this.userRepository.count({ where: { socialId: id, socialType: type } });
     return user;
   }
 
-  public async getUserBySocialId(id: string) {
-    const user = await this.userRepository.findOne({ where: { socialId: id } });
+  public async getUserBySocialId(id: string, type: SOCIAL_TYPE) {
+    const user = await this.userRepository.findOne({ where: { socialId: id, socialType: type } });
     if (!user) throw new NotFoundException('유저 정보를 찾을 수 없어요');
     return user;
   }

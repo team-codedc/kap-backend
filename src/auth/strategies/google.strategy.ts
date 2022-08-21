@@ -23,11 +23,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
     const { sub: id, name, email } = profile._json;
 
-    const googleUsersCount = await this.usersService.getCountBySocialId(id);
+    const googleUsersCount = await this.usersService.getCountBySocialId(id, 'GOOGLE');
     if (googleUsersCount <= 0) {
       await this.authService.register(id, email, name, 'GOOGLE');
     }
-    const user = await this.usersService.getUserBySocialId(id);
+    const user = await this.usersService.getUserBySocialId(id, 'GOOGLE');
     return user;
   }
 }
