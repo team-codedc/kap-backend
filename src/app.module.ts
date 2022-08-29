@@ -8,6 +8,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { HealthController } from './health/health.controller';
+import { ChallengesModule } from './challenges/challenges.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { HealthController } from './health/health.controller';
     }),
     AuthModule,
     UsersModule,
+    ChallengesModule,
+    UploadsModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
