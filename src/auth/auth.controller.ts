@@ -16,7 +16,7 @@ export class AuthController {
   }
 
   @UseGuards(GoogleAuthGuard)
-  @Get('google')
+  @Post('google')
   googleLogin(@Req() req: Request) {
     return this.authService.socialLogin(req.user as User);
   }
