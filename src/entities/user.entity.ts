@@ -24,6 +24,6 @@ export class User extends BaseEntity {
   @Column({ type: 'enum', enum: SOCIAL_TYPE_VALUES, name: 'social_type' })
   socialType: SOCIAL_TYPE;
 
-  @OneToMany(() => Challenge, (challenge) => challenge.user)
-  challenge: Challenge[];
+  @OneToMany(() => Challenge, (challenge) => challenge.host)
+  challenges: Challenge[];
 }

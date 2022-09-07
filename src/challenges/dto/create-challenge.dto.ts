@@ -36,4 +36,7 @@ export class CreateChallengeDto {
 
   @IsEnum(CHALLENGE_CATEGORY_TYPE_VALUES)
   category: CHALLENGE_CATEGORY_TYPE;
+
+  @IsString({ each: true })
+  keyword: string[];
 }

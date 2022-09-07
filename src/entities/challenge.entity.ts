@@ -4,8 +4,9 @@ import {
   CHALLENGE_FREQUENCY_TYPE,
   CHALLENGE_FREQUENCY_TYPE_VALUES,
 } from 'src/libs/constants';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { ChallengeTag } from './tag.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -46,9 +47,12 @@ export class Challenge extends BaseEntity {
   @Column({ type: 'enum', enum: CHALLENGE_CATEGORY_TYPE_VALUES })
   category: CHALLENGE_CATEGORY_TYPE;
 
-  @ManyToOne(() => User, (user) => user.challenge, {
+  @OneToMany(() => ChallengeTag, (tag) => tag.challenge)
+  tags: ChallengeTag[];
+
+  @ManyToOne(() => User, (user) => user.challenges, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @JoinColumn({ name: 'host_id' })
+  host: User;
 }
