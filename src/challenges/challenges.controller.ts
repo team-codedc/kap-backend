@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -46,5 +47,11 @@ export class ChallengesController {
     @Body() createChallengeDto: CreateChallengeDto,
   ) {
     return this.challengesService.createChallenge(user, file, createChallengeDto);
+  }
+
+  @UseGuards(AccessTokenAuthGuard)
+  @Delete(':id')
+  deleteChallengeByChallengeId(@GetUser() user: User, @Param('id') challengeId: string) {
+    return this.challengesService.deleteChallengeByChallengeId(challengeId, user);
   }
 }

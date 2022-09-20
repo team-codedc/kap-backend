@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   Injectable,
   InternalServerErrorException,
@@ -40,6 +41,13 @@ export class ChallengesService {
       where: { id: challengeId },
     });
     return challenge;
+  }
+
+  public async deleteChallengeByChallengeId(challengeId: string, user: User) {
+    const challenge = await this.getChallengeByChallengeId(challengeId);
+    if (user.id !== challenge.host.id)
+      throw new ForbiddenException('챌린지를 삭제할 권한이 없어요');
+    await this.challengeRepository.delete(challengeId);
   }
 
   public async createChallenge(
