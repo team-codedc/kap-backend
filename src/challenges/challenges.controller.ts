@@ -4,11 +4,11 @@ import {
   Get,
   Param,
   Post,
-  UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AccessTokenAuthGuard } from 'src/auth/guards';
 import { User } from 'src/entities';
 import { GetUser } from 'src/libs/decorators';
@@ -32,18 +32,19 @@ export class ChallengesController {
   }
 
   @UseGuards(AccessTokenAuthGuard)
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'good', maxCount: 1 },
-      { name: 'bad', maxCount: 1 },
-    ]),
-  )
+  @Get('detail/:id')
+  getChallengeByChallengeId(@Param('id') challengeId: string) {
+    return this.challengesService.getChallengeByChallengeId(challengeId);
+  }
+
+  @UseGuards(AccessTokenAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
   @Post()
   createChallenge(
     @GetUser() user: User,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFile() file: Express.Multer.File,
     @Body() createChallengeDto: CreateChallengeDto,
   ) {
-    return this.challengesService.createChallenge(user, files, createChallengeDto);
+    return this.challengesService.createChallenge(user, file, createChallengeDto);
   }
 }
