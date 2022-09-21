@@ -13,11 +13,12 @@ export class UploadsService {
   ) {}
 
   public upload(file: Express.Multer.File) {
-    if (!this.ALLOW_FILE_MIME.includes(file.mimetype)) {
-      throw new BadRequestException(
-        '지원하지 않는 이미지 형식이에요. jpeg, png 파일 형식을 사용해주세요',
-      );
-    }
+    console.log(file);
+    // if (!this.ALLOW_FILE_MIME.includes(file.mimetype)) {
+    //   throw new BadRequestException(
+    //     '지원하지 않는 이미지 형식이에요. jpeg, png 파일 형식을 사용해주세요',
+    //   );
+    // }
     const urlKey = uuidV4();
     const params = {
       Bucket: this.configService.get<string>('AWS_S3_BUCKET_NAME'),

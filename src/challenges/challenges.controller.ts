@@ -10,6 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { get } from 'http';
 import { AccessTokenAuthGuard } from 'src/auth/guards';
 import { User } from 'src/entities';
 import { GetUser } from 'src/libs/decorators';
@@ -43,10 +44,10 @@ export class ChallengesController {
   @Post()
   createChallenge(
     @GetUser() user: User,
-    @UploadedFile() file: Express.Multer.File,
+    // @UploadedFile() file: Express.Multer.File,
     @Body() createChallengeDto: CreateChallengeDto,
   ) {
-    return this.challengesService.createChallenge(user, file, createChallengeDto);
+    return this.challengesService.createChallenge(user, createChallengeDto);
   }
 
   @UseGuards(AccessTokenAuthGuard)
