@@ -48,8 +48,8 @@ export class ChallengesService {
   public async getJoinChallengeByUserId(userId: string) {
     const challenge = await this.challengeRepository.find({
       where: [{ members: { user: { id: userId } } }],
+      order: { createdAt: 'DESC' },
     });
-    console.log(challenge);
     return challenge;
   }
 
