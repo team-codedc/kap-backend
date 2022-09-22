@@ -1,6 +1,7 @@
 import { SOCIAL_TYPE, SOCIAL_TYPE_VALUES } from 'src/libs/constants';
 import { Column, Entity, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { ChallengeMember } from './challenge-member.entity';
 import { Challenge } from './challenge.entity';
 
 @Entity()
@@ -26,4 +27,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Challenge, (challenge) => challenge.host)
   challenges: Challenge[];
+
+  @OneToMany(() => ChallengeMember, (challengeMember) => challengeMember.user)
+  members: ChallengeMember[];
 }
