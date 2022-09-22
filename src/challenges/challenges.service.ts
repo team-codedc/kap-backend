@@ -45,6 +45,14 @@ export class ChallengesService {
     return challenge;
   }
 
+  public async getJoinChallengeByUserId(userId: string) {
+    const challenge = await this.challengeRepository.find({
+      where: [{ members: { user: { id: userId } } }],
+    });
+    console.log(challenge);
+    return challenge;
+  }
+
   public async findChallengeByUserId(id: string, challengeId: string) {
     const challenge = await this.challengeRepository.findOne({
       where: [{ id: challengeId, members: { user: { id } } }],

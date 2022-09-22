@@ -40,6 +40,12 @@ export class ChallengesController {
   }
 
   @UseGuards(AccessTokenAuthGuard)
+  @Get('join/:id')
+  getJoinChallengeByUserId(@Param('id') userId: string) {
+    return this.challengesService.getJoinChallengeByUserId(userId);
+  }
+
+  @UseGuards(AccessTokenAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   @Post()
   createChallenge(
