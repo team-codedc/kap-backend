@@ -51,6 +51,12 @@ export class ChallengesController {
   }
 
   @UseGuards(AccessTokenAuthGuard)
+  @Post('join/:id')
+  joinChallenge(@GetUser() user: User, @Param('id') challengeId: string) {
+    return this.challengesService.joinChallenge(challengeId, user);
+  }
+
+  @UseGuards(AccessTokenAuthGuard)
   @Delete(':id')
   deleteChallengeByChallengeId(@GetUser() user: User, @Param('id') challengeId: string) {
     return this.challengesService.deleteChallengeByChallengeId(challengeId, user);

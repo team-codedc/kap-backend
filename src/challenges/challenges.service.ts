@@ -17,7 +17,7 @@ export class ChallengesService {
     @InjectRepository(Challenge)
     private readonly challengeRepository: Repository<Challenge>,
     @InjectRepository(ChallengeMember)
-    private readonly ChallengeMemberRepository: Repository<ChallengeMember>,
+    private readonly challengeMemberRepository: Repository<ChallengeMember>,
     public readonly uploadsService: UploadsService,
   ) {}
 
@@ -30,7 +30,7 @@ export class ChallengesService {
 
   public async getChallengeByUserId(hostId: string) {
     const challenge = await this.challengeRepository.find({
-      relations: ['host'],
+      relations: ['host', 'members.user'],
       where: { host: { id: hostId } },
       order: { createdAt: 'DESC' },
     });
@@ -39,8 +39,15 @@ export class ChallengesService {
 
   public async getChallengeByChallengeId(challengeId: string) {
     const challenge = await this.challengeRepository.findOne({
-      relations: ['host'],
+      relations: ['host', 'members.user'],
       where: { id: challengeId },
+    });
+    return challenge;
+  }
+
+  public async findChallengeByUserId(id: string, challengeId: string) {
+    const challenge = await this.challengeRepository.findOne({
+      where: [{ id: challengeId, members: { user: { id } } }],
     });
     return challenge;
   }
@@ -68,16 +75,35 @@ export class ChallengesService {
       });
       await this.challengeRepository.save(challenge);
 
-      const member = await this.ChallengeMemberRepository.create({
+      const member = await this.challengeMemberRepository.create({
         challenge,
         user: user,
       });
-      await this.ChallengeMemberRepository.save(member);
+      await this.challengeMemberRepository.save(member);
     } catch (error) {
-      console.log(error);
       if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException('일시적인 오류가 발생했어요');
     }
+  }
+
+  public async joinChallenge(challengeId: string, user: User) {
+    const userChallenge = await this.findChallengeByUserId(user.id, challengeId);
+    if (userChallenge) throw new BadRequestException('이미 참여 중인 챌린지에요');
+
+    const challenge = await this.challengeRepository.findOne({
+      relations: ['host', 'members', 'members.user'],
+      where: { id: challengeId },
+    });
+
+    const member = await this.challengeMemberRepository.create({
+      user: user,
+      challenge: challenge,
+    });
+
+    challenge.members.push(member);
+
+    await this.challengeRepository.save(challenge);
+    await this.challengeMemberRepository.save(member);
   }
 
   public async deleteChallengeByChallengeId(challengeId: string, user: User) {
