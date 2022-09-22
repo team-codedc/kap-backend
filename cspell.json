@@ -2,14 +2,18 @@
   "version": "0.2",
   "language": "en",
   "words": [
-    /* nestjs */
-    "nestjs",
-    "TYPEORM",
+    "certificable",
+    "commitlint",
+    "fieldname",
     "kakao",
-
-    /* commitlint */
-    "commitlint"
+    "nestjs",
+    "TYPEORM"
   ],
   "flagWords": [],
-  "ignorePaths": ["node_modules/**", "./README.md", ".gitignore", "yarn.lock"]
+  "ignorePaths": [
+    "node_modules/**",
+    "./README.md",
+    ".gitignore",
+    "yarn.lock"
+  ]
 }

@@ -1,6 +1,8 @@
 import { SOCIAL_TYPE, SOCIAL_TYPE_VALUES } from 'src/libs/constants';
-import { Column, Entity, Unique } from 'typeorm';
+import { Column, Entity, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from './base.entity';
+import { ChallengeMember } from './challenge-member.entity';
+import { Challenge } from './challenge.entity';
 
 @Entity()
 @Unique(['socialId', 'email'])
@@ -22,4 +24,10 @@ export class User extends BaseEntity {
 
   @Column({ type: 'enum', enum: SOCIAL_TYPE_VALUES, name: 'social_type' })
   socialType: SOCIAL_TYPE;
+
+  @OneToMany(() => Challenge, (challenge) => challenge.host)
+  challenges: Challenge[];
+
+  @OneToMany(() => ChallengeMember, (challengeMember) => challengeMember.user)
+  members: ChallengeMember[];
 }
